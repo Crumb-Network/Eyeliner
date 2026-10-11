@@ -3,6 +3,7 @@ package net.kalbskinder.eyeliner.element;
 import net.kalbskinder.eyeliner.action.ClickType;
 import net.kalbskinder.eyeliner.style.Style;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -17,18 +18,26 @@ public final class ButtonElement extends Element {
     private final @Nullable String onClick;
     private final @Nullable String onLeftClick;
     private final @Nullable String onRightClick;
-    private final @Nullable Key sound;
+    private final @Nullable Sound sound;
 
     public ButtonElement(@Nullable String id, Style style, List<Element> children) {
         super("button", id, style, children);
         this.onClick = actionKey(style, "onclick");
         this.onLeftClick = actionKey(style, "onleftclick");
         this.onRightClick = actionKey(style, "onrightclick");
-        this.sound = style.parse("sound", v -> {
+        final Key soundKey = style.parse("sound", v -> {
             final String s = v.strip().toLowerCase(Locale.ROOT);
             if (s.equals("none") || s.equals("false") || s.isEmpty()) return null;
             return Key.key(s);
         });
+        final double volume = style.nonNegative("soundvolume");
+        final double pitch = style.parse("soundpitch", v -> {
+            final double d = Double.parseDouble(v.strip());
+            if (!(d >= 0.5 && d <= 2)) throw new IllegalArgumentException("expected 0.5..2");
+            return d;
+        });
+        this.sound = soundKey == null || volume == 0 ? null
+                : Sound.sound(soundKey, Sound.Source.MASTER, (float) volume, (float) pitch);
     }
 
     private static @Nullable String actionKey(Style style, String key) {
@@ -50,9 +59,10 @@ public final class ButtonElement extends Element {
     }
 
     /**
-     * Sound played to the player when clicked, or null for none.
+     * Sound played to the player when clicked ({@code sound}, {@code soundVolume}, {@code soundPitch}), or null for none.
+     * Any sound key works, including custom ones from a resource pack.
      */
-    public @Nullable Key sound() {
+    public @Nullable Sound sound() {
         return sound;
     }
 }

@@ -1,15 +1,96 @@
-<screen height="2" width="4" padding="0.5" bg="#3b3b3b">
+<!--
+    Eyeliner feature showcase.
 
-    <text color="#f8a407" size="5">Main Menu</text>
+    Units: sizes are in blocks, "50%" is relative to the parent's content box.
+    Colors: #RGB, #RGBA, #RRGGBB or #RRGGBBAA (alpha last, like CSS), or names like "gold" / "transparent".
+            00 = fully transparent, 80 = ~50%, ff = opaque.
+    Every attribute is optional and falls back to a default.
+-->
+<screen
+    width="4"
+    height="2.6"
+    padding="0.2 0.3"
+    gap="0.08"
+    direction="column"
+    align="center"
+    valign="top"
+    bg="#00000000"
+    border="0.02"
+    borderColor="#ffffff40"
+    radius="0.15"
+    distance="2.5"
+    reach="6"
+    closeDistance="10"
+    brightness="15"
+>
 
+    <!-- MiniMessage works inside <text>; shadow and color/size are inherited by children -->
+    <text size="5" shadow="true"><gradient:#f8a407:#ff4fd8><bold>Main Menu</bold></gradient></text>
+
+    <!-- <player> is a placeholder passed by the server; id lets Java update the text later -->
+    <text id="greeting" size="1.6" color="#ffffffcc">Welcome back, <aqua><player></aqua>!</text>
+
+    <!-- 50% transparent background, custom hover color and custom click sound -->
     <button
         onClick="joinGame"
         variant="rounded"
-        bg="#00ff00"
+        bg="#22c55e80"
+        hoverBg="#22c55ee0"
+        width="70%"
+        padding="0.07 0.15"
         textAlign="center"
+        sound="minecraft:entity.experience_orb.pickup"
+        soundVolume="0.8"
+        soundPitch="1.4"
     >
-        <sprite item="minecraft:diamond" mr="0.02" />
-        <text color="#ffffff" size="2">Join Game</text>
+        <sprite item="minecraft:diamond_sword" size="0.22" mr="0.05" glint="true" />
+        <text size="2.2">Join Game</text>
     </button>
+
+    <!-- Different actions for left and right click; built-in "pill" + "primary" variants -->
+    <button
+        onLeftClick="openSettings"
+        onRightClick="resetSettings"
+        variant="pill primary"
+        hoverBg="#5b9bff"
+        width="70%"
+        soundPitch="0.8"
+    >
+        <sprite item="minecraft:comparator" size="0.2" mr="0.05" />
+        <text size="2">Settings <gray>(right click: reset)</gray></text>
+    </button>
+
+    <!-- Outline variant: transparent fill with a border; loose text becomes a <text> automatically -->
+    <button
+        onClick="showLeaderboard"
+        variant="outline"
+        borderColor="#f8a407"
+        hoverBg="#f8a40740"
+        color="#f8a407"
+        width="70%"
+        py="0.06"
+    >
+        Leaderboard
+    </button>
+
+    <!-- Square corners, left-aligned content, no click sound -->
+    <button
+        onClick="quit"
+        variant="danger flat"
+        bg="#d13b3b99"
+        hoverBg="#ff5555cc"
+        width="70%"
+        align="left"
+        pl="0.15"
+        sound="none"
+    >
+        <sprite item="minecraft:barrier" size="0.18" mr="0.06" />
+        <text size="2">Quit</text>
+    </button>
+
+    <!-- Long text wraps to its width; textAlign aligns the lines -->
+    <text width="90%" size="1.2" color="#ffffff99" textAlign="center" mt="0.05">
+        Tip: look at a button to highlight it, then left or right click. Walk away to close this menu.
+    </text>
 
 </screen>

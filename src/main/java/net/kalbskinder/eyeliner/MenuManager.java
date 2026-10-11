@@ -8,7 +8,6 @@ import net.kalbskinder.eyeliner.layout.LayoutEngine;
 import net.kalbskinder.eyeliner.layout.LayoutNode;
 import net.kalbskinder.eyeliner.render.MenuRenderer;
 import net.kalbskinder.eyeliner.render.ScreenTransform;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -192,8 +191,8 @@ public final class MenuManager {
         final String action = button.element().actionFor(type);
         if (action == null) return;
 
-        final Key sound = button.element().sound();
-        if (sound != null) player.playSound(Sound.sound(sound, Sound.Source.MASTER, 0.6f, 1f));
+        final Sound sound = button.element().sound();
+        if (sound != null) player.playSound(sound);
 
         ClickHandler handler = session.menu().handler(action);
         if (handler == null) handler = globalActions.get(action);

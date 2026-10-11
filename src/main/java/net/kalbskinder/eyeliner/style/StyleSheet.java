@@ -59,6 +59,12 @@ public final class StyleSheet {
             Map.entry("margin-bottom", "mb"),
             Map.entry("margin-left", "ml"),
             Map.entry("on-click", "onclick"),
+            Map.entry("click-sound", "sound"),
+            Map.entry("clicksound", "sound"),
+            Map.entry("volume", "soundvolume"),
+            Map.entry("sound-volume", "soundvolume"),
+            Map.entry("pitch", "soundpitch"),
+            Map.entry("sound-pitch", "soundpitch"),
             Map.entry("action", "onclick")
     );
 
@@ -106,8 +112,10 @@ public final class StyleSheet {
                 Map.entry("padding", "0.06 0.12"),
                 Map.entry("gap", "0.05"),
                 Map.entry("bg", "#3a3a4c"),
-                Map.entry("sound", "minecraft:ui.button.click")
-        ), Set.of("onclick", "onleftclick", "onrightclick", "sound"));
+                Map.entry("sound", "minecraft:ui.button.click"),
+                Map.entry("soundvolume", "0.6"),
+                Map.entry("soundpitch", "1")
+        ), Set.of("onclick", "onleftclick", "onrightclick", "sound", "soundvolume", "soundpitch"));
         registerTag("text", Map.of(), Set.of());
         registerTag("sprite", Map.ofEntries(
                 Map.entry("item", "minecraft:barrier"),

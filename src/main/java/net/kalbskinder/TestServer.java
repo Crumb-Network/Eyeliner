@@ -2,6 +2,7 @@ package net.kalbskinder;
 
 import net.kalbskinder.eyeliner.Menu;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.minestom.server.Auth;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.Command;
@@ -51,20 +52,31 @@ public class TestServer {
             ctx.player().sendMessage(Component.text("Joining game..."));
             ctx.close();
         });
+        Eyeliner.registerAction("openSettings", ctx -> ctx.player().sendMessage(Component.text("Opening settings...")));
+        Eyeliner.registerAction("resetSettings", ctx -> {
+            ctx.player().sendMessage(Component.text("Settings reset."));
+            ctx.session().setText("greeting", "<green>Settings were reset!");
+        });
+        Eyeliner.registerAction("showLeaderboard", ctx -> ctx.player().sendMessage(Component.text("1. " + ctx.player().getUsername())));
+        Eyeliner.registerAction("quit", ctx -> ctx.close());
         Menu mainMenu = Eyeliner.loadResource("example.eyeliner");
 
         globalEventHandler.addListener(PlayerSpawnEvent.class, event -> {
-            if (event.isFirstSpawn()) mainMenu.open(event.getPlayer());
+            if (event.isFirstSpawn()) openMainMenu(mainMenu, event.getPlayer());
         });
 
         Command menuCommand = new Command("menu");
         menuCommand.setDefaultExecutor((sender, _) -> {
             if (!(sender instanceof Player player)) return;
             Eyeliner.closeAll(player);
-            mainMenu.open(player);
+            openMainMenu(mainMenu, player);
         });
         MinecraftServer.getCommandManager().register(menuCommand);
 
         server.start("0.0.0.0", 25565);
+    }
+
+    private static void openMainMenu(Menu menu, Player player) {
+        menu.open(player, Placeholder.unparsed("player", player.getUsername()));
     }
 }
