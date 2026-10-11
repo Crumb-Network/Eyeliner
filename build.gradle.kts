@@ -13,6 +13,7 @@ dependencies {
     implementation("net.minestom:minestom:2026.08.28-26.2")
     annotationProcessor("org.projectlombok:lombok:1.18.48")
     implementation("org.slf4j:slf4j-api:1.7.25")
+    implementation("net.kyori:adventure-text-minimessage:5.2.0")
 }
 
 tasks.test {
