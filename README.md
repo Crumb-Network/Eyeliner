@@ -4,6 +4,16 @@ Eyeliner is a [Minestom](https://minestom.net) library for building in-world use
 Menus are written in `.eyeliner` files, rendered with display entities and shown to players through packets only.
 Players interact with them by looking at a button and clicking.
 
+## Installation
+
+```kotlin
+dependencies {
+  implementation("net.kalbskinder:eyeliner:VERSION")
+}
+```
+
+## Documentation
+
 ```html
 <screen width="4" height="2" bg="#14141ee6" variant="rounded">
     <text size="5" color="#f8a407">Main Menu</text>
