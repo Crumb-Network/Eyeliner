@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "net.kalbskinder"
-version = "0.0.1"
+version = providers.gradleProperty("releaseVersion").getOrElse("0.0.1-SNAPSHOT")
 
 repositories {
     mavenCentral()
