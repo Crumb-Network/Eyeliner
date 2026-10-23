@@ -192,7 +192,7 @@ public final class MenuManager {
         if (action == null) return;
 
         final Sound sound = button.element().sound();
-        if (sound != null) player.playSound(sound);
+        if (sound != null) player.playSound(sound, Sound.Emitter.self());
 
         ClickHandler handler = session.menu().handler(action);
         if (handler == null) handler = globalActions.get(action);
