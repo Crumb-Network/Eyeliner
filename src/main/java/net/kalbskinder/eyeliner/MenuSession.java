@@ -31,6 +31,7 @@ public final class MenuSession {
     private final Instance instance;
     private final Pos center;
     private final ScreenTransform transform;
+    private final ScreenTransform back;
     private final LayoutNode layout;
     private final MenuRenderer.Result rendered;
     private final Map<Integer, MenuRenderer.RenderedButton> buttonsByInteraction = new HashMap<>();
@@ -46,6 +47,7 @@ public final class MenuSession {
         this.instance = player.getInstance();
         this.center = center;
         this.transform = transform;
+        this.back = transform.back();
         this.layout = layout;
         this.rendered = rendered;
         for (MenuRenderer.RenderedButton button : rendered.buttons()) {
@@ -116,10 +118,10 @@ public final class MenuSession {
      * @return false if there is no text element with this id
      */
     public boolean setText(String id, Component text) {
-        final PacketEntity<TextDisplayMeta> entity = rendered.textsById().get(id);
-        if (entity == null) return false;
+        final List<PacketEntity<TextDisplayMeta>> entities = rendered.textsById().get(id);
+        if (entities == null) return false;
         synchronized (this) {
-            if (open) entity.meta().setText(text);
+            if (open) entities.forEach(entity -> entity.meta().setText(text));
         }
         return true;
     }
@@ -134,12 +136,13 @@ public final class MenuSession {
     // ---- input, called by MenuManager on the player's thread ----
 
     /**
-     * Ray-casts against the screen.
+     * Ray-casts against the side of the screen facing the eye.
      *
      * @return (ui x, ui y, distance) if the ray hits the screen rectangle within reach, otherwise null
      */
     double @Nullable [] raycast(Point eye, Vec direction) {
-        final double[] hit = transform.raycast(eye, direction, menu.root().reach());
+        final ScreenTransform side = transform.isInFront(eye) ? transform : back;
+        final double[] hit = side.raycast(eye, direction, menu.root().reach());
         if (hit == null || !layout.contains(hit[0], hit[1])) return null;
         return hit;
     }
@@ -152,7 +155,12 @@ public final class MenuSession {
         return null;
     }
 
-    MenuRenderer.@Nullable RenderedButton buttonByInteraction(int entityId) {
+    /**
+     * The button owning an interaction entity. Hit boxes are placed for the front side only, so this returns null
+     * when {@code eye} is behind the screen, where the box would belong to the mirrored button.
+     */
+    MenuRenderer.@Nullable RenderedButton buttonByInteraction(int entityId, Point eye) {
+        if (!transform.isInFront(eye)) return null;
         return buttonsByInteraction.get(entityId);
     }
 

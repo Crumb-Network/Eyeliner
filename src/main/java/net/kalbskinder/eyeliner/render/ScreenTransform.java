@@ -40,6 +40,21 @@ public final class ScreenTransform {
     }
 
     /**
+     * The same screen seen from behind: rotated by 180 degrees around its center, so content rendered with it
+     * reads correctly from the back. Text displays are only drawn from the front, so each side needs its own entities.
+     */
+    public ScreenTransform back() {
+        return new ScreenTransform(origin.withView(origin.yaw() + 180, 0), width, height);
+    }
+
+    /**
+     * Whether {@code point} lies on the side of the screen it faces.
+     */
+    public boolean isInFront(Point point) {
+        return point.sub(origin).asVec().dot(normal) >= 0;
+    }
+
+    /**
      * Creates a screen {@code distance} blocks in front of the given eye position, facing back at it.
      */
     public static Pos inFrontOf(Pos eye, double distance) {

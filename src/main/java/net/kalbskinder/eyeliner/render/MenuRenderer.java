@@ -40,6 +40,7 @@ import java.util.function.BiFunction;
  *     and the player cannot break blocks behind the button</li>
  * </ul>
  * Nested elements are pushed slightly towards the viewer to avoid z-fighting.
+ * Text displays are only visible from the front, so the screen is rendered twice: once per side, back to back.
  */
 public final class MenuRenderer {
 
@@ -68,31 +69,49 @@ public final class MenuRenderer {
      * Everything that was rendered for one menu.
      */
     public record Result(List<PacketEntity<?>> entities, List<RenderedButton> buttons,
-                         Map<String, PacketEntity<TextDisplayMeta>> textsById) {
+                         Map<String, List<PacketEntity<TextDisplayMeta>>> textsById) {
     }
 
     private final Player viewer;
-    private final ScreenTransform transform;
+    private final ScreenTransform front;
     private final ScreenElement screen;
+    private ScreenTransform transform; // side currently being rendered
+    private int backButtonIndex;
     private final float cullSize;
 
     private final List<PacketEntity<?>> entities = new ArrayList<>();
     private final List<RenderedButton> buttons = new ArrayList<>();
-    private final Map<String, PacketEntity<TextDisplayMeta>> textsById = new HashMap<>();
+    private final List<List<PacketEntity<TextDisplayMeta>>> buttonFills = new ArrayList<>();
+    private final Map<String, List<PacketEntity<TextDisplayMeta>>> textsById = new HashMap<>();
 
     public MenuRenderer(Player viewer, ScreenTransform transform, ScreenElement screen) {
         this.viewer = viewer;
-        this.transform = transform;
+        this.front = transform;
         this.screen = screen;
         this.cullSize = (float) (2 * Math.max(transform.width(), transform.height()));
     }
 
     public Result render(LayoutNode root) {
-        renderNode(root);
-        return new Result(List.copyOf(entities), List.copyOf(buttons), Map.copyOf(textsById));
+        transform = front;
+        renderNode(root, true);
+        transform = front.back();
+        backButtonIndex = 0;
+        renderNode(root, false);
+
+        final List<RenderedButton> result = new ArrayList<>(buttons.size());
+        for (int i = 0; i < buttons.size(); i++) {
+            final RenderedButton b = buttons.get(i);
+            result.add(new RenderedButton(b.node(), b.element(), List.copyOf(buttonFills.get(i)), b.bg(), b.hoverBg(), b.interactionIds()));
+        }
+        final Map<String, List<PacketEntity<TextDisplayMeta>>> texts = new HashMap<>();
+        textsById.forEach((id, list) -> texts.put(id, List.copyOf(list)));
+        return new Result(List.copyOf(entities), List.copyOf(result), Map.copyOf(texts));
     }
 
-    private void renderNode(LayoutNode node) {
+    /**
+     * @param frontSide true for the front pass, which also creates the buttons and their interaction entities
+     */
+    private void renderNode(LayoutNode node, boolean frontSide) {
         final Element element = node.element();
         final Style style = element.style();
         final double z = node.depth() * Z_STEP;
@@ -122,11 +141,14 @@ public final class MenuRenderer {
             }
         }
 
-        if (button) {
-            buttons.add(new RenderedButton(node, (ButtonElement) element, List.copyOf(fills), bg, hoverBg, interactions(node)));
+        if (button && frontSide) {
+            buttons.add(new RenderedButton(node, (ButtonElement) element, List.of(), bg, hoverBg, interactions(node)));
+            buttonFills.add(fills);
+        } else if (button) {
+            buttonFills.get(backButtonIndex++).addAll(fills);
         }
 
-        for (LayoutNode child : node.children()) renderNode(child);
+        for (LayoutNode child : node.children()) renderNode(child, frontSide);
     }
 
     private PacketEntity<TextDisplayMeta> rectangle(ShapeBuilder.Piece piece, double z, int color) {
@@ -161,7 +183,7 @@ public final class MenuRenderer {
         final double centerX = transform.localX(text.blockX() + text.blockWidth() / 2) - 0.5 * FontMetrics.PIXEL * text.scale();
         final double bottom = transform.localY(text.blockY() + text.blockHeight());
         meta.setTranslation(transform.offset(centerX, bottom, z));
-        if (element.id() != null) textsById.put(element.id(), entity);
+        if (element.id() != null) textsById.computeIfAbsent(element.id(), _ -> new ArrayList<>()).add(entity);
     }
 
     private void renderSprite(LayoutNode node, SpriteElement sprite, double z) {
