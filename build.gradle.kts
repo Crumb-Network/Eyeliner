@@ -4,8 +4,7 @@ plugins {
 }
 
 group = "net.kalbskinder"
-// The release workflow passes -PreleaseVersion=<tag without leading "v">
-version = providers.gradleProperty("releaseVersion").getOrElse("0.0.1-SNAPSHOT")
+version = "0.0.1"
 
 repositories {
     mavenCentral()
