@@ -175,9 +175,8 @@ public final class MenuManager {
         Target target = target(player, player.getPosition());
         if ((target == null || target.button() == null) && targetId >= 0) {
             // The crosshair is not over a button (e.g. due to latency), fall back to the clicked hit box.
-            final Pos eye = player.getPosition().add(0, player.getEyeHeight(), 0);
             for (MenuSession session : sessionsOf(player)) {
-                final MenuRenderer.RenderedButton button = session.buttonByInteraction(targetId, eye);
+                final MenuRenderer.RenderedButton button = session.buttonByInteraction(targetId);
                 if (button != null) target = new Target(session, button);
             }
         }

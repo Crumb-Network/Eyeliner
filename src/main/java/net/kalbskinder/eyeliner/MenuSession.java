@@ -156,11 +156,10 @@ public final class MenuSession {
     }
 
     /**
-     * The button owning an interaction entity. Hit boxes are placed for the front side only, so this returns null
-     * when {@code eye} is behind the screen, where the box would belong to the mirrored button.
+     * The button owning an interaction entity. Both sides of a button share the same position, so this works
+     * from either side.
      */
-    MenuRenderer.@Nullable RenderedButton buttonByInteraction(int entityId, Point eye) {
-        if (!transform.isInFront(eye)) return null;
+    MenuRenderer.@Nullable RenderedButton buttonByInteraction(int entityId) {
         return buttonsByInteraction.get(entityId);
     }
 

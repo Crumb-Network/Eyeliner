@@ -23,11 +23,17 @@ public final class ScreenTransform {
     private final Vec up = new Vec(0, 1, 0);
     private final Vec normal;
     private final float[] rotation;
+    private final boolean mirrored;
 
     /**
      * @param origin world position of the screen center; its yaw is the direction the screen faces
      */
     public ScreenTransform(Pos origin, double width, double height) {
+        this(origin, width, height, false);
+    }
+
+    private ScreenTransform(Pos origin, double width, double height, boolean mirrored) {
+        this.mirrored = mirrored;
         this.origin = origin.withView(0, 0);
         this.width = width;
         this.height = height;
@@ -40,11 +46,11 @@ public final class ScreenTransform {
     }
 
     /**
-     * The same screen seen from behind: rotated by 180 degrees around its center, so content rendered with it
-     * reads correctly from the back. Text displays are only drawn from the front, so each side needs its own entities.
+     * The back side of this screen: faces the opposite direction, but UI coordinates map to the same world positions
+     * (the UI x axis is mirrored), so shapes rendered with it are the back faces of the front ones.
      */
     public ScreenTransform back() {
-        return new ScreenTransform(origin.withView(origin.yaw() + 180, 0), width, height);
+        return new ScreenTransform(origin.withView(origin.yaw() + 180, 0), width, height, !mirrored);
     }
 
     /**
@@ -85,8 +91,12 @@ public final class ScreenTransform {
         return rotation.clone();
     }
 
+    /**
+     * Note that on a {@link #back()} transform the UI x axis points left, so this maps the left edge of a box to
+     * its right edge.
+     */
     public double localX(double uiX) {
-        return uiX - width / 2;
+        return mirrored ? width / 2 - uiX : uiX - width / 2;
     }
 
     public double localY(double uiY) {
@@ -120,7 +130,7 @@ public final class ScreenTransform {
         final Vec hit = eye.asVec().add(direction.mul(t)).sub(origin.asVec());
         final double localX = hit.dot(right);
         final double localY = hit.dot(up);
-        return new double[]{localX + width / 2, height / 2 - localY, t};
+        return new double[]{mirrored ? width / 2 - localX : localX + width / 2, height / 2 - localY, t};
     }
 
     public static Vec direction(float yaw, float pitch) {

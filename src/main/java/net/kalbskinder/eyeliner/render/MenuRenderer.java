@@ -40,7 +40,8 @@ import java.util.function.BiFunction;
  *     and the player cannot break blocks behind the button</li>
  * </ul>
  * Nested elements are pushed slightly towards the viewer to avoid z-fighting.
- * Text displays are only visible from the front, so the screen is rendered twice: once per side, back to back.
+ * Displays are only visible from the front, so backgrounds and borders are rendered a second time facing backwards,
+ * at the same positions. Text and sprites are only rendered on the front.
  */
 public final class MenuRenderer {
 
@@ -125,7 +126,8 @@ public final class MenuRenderer {
         if (drawFill || style.border() > 0) {
             final double radius = style.radius().resolve(Math.min(node.width(), node.height()) / 2, 0);
             final List<ShapeBuilder.Piece> pieces = ShapeBuilder.build(
-                    transform.localX(node.x()), transform.localY(node.y() + node.height()),
+                    Math.min(transform.localX(node.x()), transform.localX(node.x() + node.width())),
+                    transform.localY(node.y() + node.height()),
                     node.width(), node.height(), radius, style.border());
             for (ShapeBuilder.Piece piece : pieces) {
                 if (piece.fill() && !drawFill) continue;
@@ -134,10 +136,12 @@ public final class MenuRenderer {
             }
         }
 
-        switch (element) {
-            case TextElement text -> renderText(node, text, z + Z_STEP / 2);
-            case SpriteElement sprite -> renderSprite(node, sprite, z + Z_STEP / 2);
-            default -> {
+        if (frontSide) {
+            switch (element) {
+                case TextElement text -> renderText(node, text, z + Z_STEP / 2);
+                case SpriteElement sprite -> renderSprite(node, sprite, z + Z_STEP / 2);
+                default -> {
+                }
             }
         }
 
